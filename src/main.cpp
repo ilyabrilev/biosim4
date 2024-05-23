@@ -2,6 +2,7 @@
 
 // This is included here only for the purpose of unit testing of basic types
 #include "basicTypes.h"
+#include "nested/Nested.h"
 
 // This is the only call needed to start the simulator. No header file
 // because it's just one declaration. Pass it argc and argv as if from main().
@@ -18,6 +19,9 @@ namespace BS {
 
 int main(int argc, char **argv)
 {
+    Nested* nes = new Nested();
+    nes->printHello();
+
     BS::unitTestBasicTypes(); // called only for unit testing of basic types
 
     // Start the simulator with optional config filename (default "biosim4.ini").

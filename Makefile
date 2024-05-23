@@ -32,10 +32,17 @@ else
   LDFLAGS += -O3 -s
 endif
 
-SOURCE :=  $(wildcard src/*.cpp src/*.h)
+SOURCE :=  $(wildcard src/*.cpp src/*.h src/nested/*.cpp src/nested/*.h)
+# $(info $(SOURCE))
 CXXSOURCE :=  $(filter %.cpp, $(SOURCE))
 HEADERS :=  $(filter %.h, $(SOURCE))
 OBJS := $(subst src/,$(OBJ_DIR)/, $(CXXSOURCE:.cpp=.o))
+
+# $(info OBJS is $(OBJS))
+# SOURCE2 :=  $(wildcard src/nested/*.cpp, src/nested/*.h)
+# CXXSOURCE2 :=  $(filter %.cpp, $(SOURCE2))
+# HEADERS2 :=  $(filter %.h, $(SOURCE2))
+# OBJS2 := $(subst src/nested/,$(OBJ_DIR)/, $(CXXSOURCE2:.cpp=.o))
 
 
 all: debug release
@@ -44,10 +51,12 @@ all: debug release
 before_debug:
 	test -d bin/Debug || mkdir -p bin/Debug
 	test -d obj/Debug/src || mkdir -p obj/Debug/src
+	test -d obj/Debug/src/nested || mkdir -p obj/Debug/src/nested
 
 before_release:
 	test -d bin/Release || mkdir -p bin/Release
 	test -d obj/Release/src || mkdir -p obj/Release/src
+	test -d obj/Release/src/nested || mkdir -p obj/Release/src/nested
 
 .PHONY : release debug    
 debug: before_debug
@@ -60,7 +69,12 @@ release: before_release
 $(OUT_DIR)biosim4: $(OBJS)
 	$(LD) -o $@ $^ $(LDFLAGS)
 
+# $(OUT_DIR)biosim4: $(OBJS2)
+# 	$(LD) -o $@ $^ $(LDFLAGS)
+
 $(OBJS): $(HEADERS)
+
+# $(OBJS2): $(HEADERS2)
 
 $(OBJ_DIR)%.o : src%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
