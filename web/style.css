@@ -1,0 +1,63 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #1a1a2e; color: #eee; font-family: monospace; display: flex; height: 100vh; overflow: hidden; }
+
+#sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: #16213e;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-right: 1px solid #333;
+    overflow-y: auto;
+}
+
+#sidebar h2 { font-size: 14px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+
+.stat { font-size: 13px; line-height: 1.6; }
+.stat span { color: #7ec8e3; }
+
+.controls { display: flex; flex-direction: column; gap: 8px; }
+
+button {
+    padding: 8px 12px;
+    background: #0f3460;
+    color: #eee;
+    border: 1px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 13px;
+}
+button:hover { background: #1a5276; }
+button.active { background: #e94560; border-color: #e94560; }
+
+.speed-control { display: flex; align-items: center; gap: 8px; }
+.speed-control input { flex: 1; }
+.speed-control label { font-size: 12px; white-space: nowrap; }
+
+#status {
+    margin-top: auto;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    text-align: center;
+}
+#status.connected { background: #1b4332; color: #95d5b2; }
+#status.disconnected { background: #3d0000; color: #ff6b6b; }
+
+#canvas-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+canvas {
+    image-rendering: pixelated;
+    cursor: grab;
+}
+canvas:active { cursor: grabbing; }

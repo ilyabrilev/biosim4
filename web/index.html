@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Biosim4 — Browser Viewer</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="sidebar">
+    <h2>biosim4</h2>
+
+    <div class="stat">
+        Generation: <span id="generation">—</span><br>
+        Step: <span id="step">—</span><br>
+        Alive: <span id="alive">—</span><br>
+        Grid: <span id="gridSize">—</span><br>
+        FPS: <span id="fps">—</span>
+    </div>
+
+    <div class="controls">
+        <button id="btnPause">Pause</button>
+        <button id="btnResume">Resume</button>
+
+        <div class="speed-control">
+            <label>Speed:</label>
+            <input type="range" id="speedSlider" min="-5" max="5" value="0" step="1">
+            <span id="speedVal">0</span>
+        </div>
+    </div>
+
+    <div id="status" class="disconnected">Disconnected</div>
+</div>
+
+<div id="canvas-container">
+    <canvas id="canvas"></canvas>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
