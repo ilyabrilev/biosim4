@@ -35,7 +35,32 @@ button.active { background: #e94560; border-color: #e94560; }
 
 .speed-control { display: flex; align-items: center; gap: 8px; }
 .speed-control input { flex: 1; }
-.speed-control label { font-size: 12px; white-space: nowrap; }
+.speed-control label, .setting-control label { font-size: 12px; white-space: nowrap; }
+
+.setting-control { display: flex; flex-direction: column; gap: 4px; }
+.setting-input { display: flex; gap: 4px; }
+.setting-input input[type="text"] {
+    flex: 1;
+    padding: 4px 6px;
+    background: #0a1628;
+    color: #eee;
+    border: 1px solid #555;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 13px;
+}
+.setting-input button { padding: 4px 10px; }
+.checkbox-control label { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+.setting-input select {
+    flex: 1;
+    padding: 4px 6px;
+    background: #0a1628;
+    color: #eee;
+    border: 1px solid #555;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 13px;
+}
 
 #status {
     margin-top: auto;

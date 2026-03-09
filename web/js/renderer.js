@@ -49,16 +49,25 @@ export class Renderer {
     }
 
     _drawIndividuals(ctx, individuals, sizeY) {
+        ctx.beginPath();
+        for (const ind of individuals) {
+            ctx.moveTo(ind.x + 1.0, sizeY - ind.y - 0.5);
+            ctx.arc(ind.x + 0.5, sizeY - ind.y - 0.5, 0.5, 0, Math.PI * 2);
+        }
+        // Batch stroke for performance, then fill individually for color
         for (const ind of individuals) {
             ctx.fillStyle = `rgb(${ind.r},${ind.g},${ind.b})`;
-            ctx.fillRect(ind.x, sizeY - ind.y - 1, 1, 1);
+            ctx.beginPath();
+            ctx.arc(ind.x + 0.5, sizeY - ind.y - 0.5, 0.5, 0, Math.PI * 2);
+            ctx.fill();
         }
     }
 
     _drawBarriers(ctx, barriers, sizeY) {
         ctx.fillStyle = '#888';
+        const pad = 0.05;
         for (const b of barriers) {
-            ctx.fillRect(b.x, sizeY - b.y - 1, 1, 1);
+            ctx.fillRect(b.x - pad, sizeY - b.y - 1 - pad, 1 + pad * 2, 1 + pad * 2);
         }
     }
 

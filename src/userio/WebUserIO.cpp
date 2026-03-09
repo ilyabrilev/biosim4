@@ -1,6 +1,7 @@
 #include "WebUserIO.h"
 #include <iostream>
 #include <cstring>
+#include <sstream>
 
 namespace BS
 {
@@ -36,9 +37,14 @@ namespace BS
 
             app.ws<PerSocketData>("/*", {
                 .open = [this](auto *ws) {
-                    std::lock_guard<std::mutex> lock(clientsMutex);
-                    clients.insert(ws);
+                    {
+                        std::lock_guard<std::mutex> lock(clientsMutex);
+                        clients.insert(ws);
+                    }
                     std::cout << "WebSocket client connected. Total: " << clients.size() << std::endl;
+                    // Send metadata (challenge list, current params) as TEXT
+                    std::string meta = buildMetadata();
+                    ws->send(meta, uWS::OpCode::TEXT);
                 },
                 .message = [this](auto *ws, std::string_view message, uWS::OpCode opCode) {
                     handleCommand(message);
@@ -71,6 +77,8 @@ namespace BS
             paused = true;
         } else if (cmd == "resume") {
             paused = false;
+        } else if (cmd == "restart") {
+            restartOnEnd = true;
         } else if (cmd == "stop") {
             stopped = true;
         } else if (cmd.rfind("speed:", 0) == 0) {
@@ -251,6 +259,8 @@ namespace BS
     {
         currentGeneration = generation;
         increaseSpeedCounter = 0;
+        // Initialize challenge shapes in grid coordinates (scale=1)
+        survivalCriteriaManager.initShapes(1);
     }
 
     void WebUserIO::endOfStep(unsigned simStep)
@@ -276,5 +286,47 @@ namespace BS
 
     void WebUserIO::setFromParams()
     {
+    }
+
+    std::string WebUserIO::buildMetadata()
+    {
+        std::ostringstream ss;
+        ss << "{\"type\":\"meta\",\"challenge\":" << p.challenge
+           << ",\"pointMutationRate\":" << p.pointMutationRate
+           << ",\"killEnable\":" << (p.killEnable ? "true" : "false")
+           << ",\"population\":" << p.population
+           << ",\"stepsPerGeneration\":" << p.stepsPerGeneration
+           << ",\"barrierType\":" << p.barrierType
+           << ",\"barriers\":["
+           << "{\"value\":0,\"text\":\"No barrier\"}"
+           << ",{\"value\":1,\"text\":\"Vertical const\"}"
+           << ",{\"value\":2,\"text\":\"Vertical rand\"}"
+           << ",{\"value\":3,\"text\":\"5 blocks staggered\"}"
+           << ",{\"value\":4,\"text\":\"Horizontal const\"}"
+           << ",{\"value\":5,\"text\":\"3 floating islands\"}"
+           << ",{\"value\":6,\"text\":\"Spots\"}"
+           << "],\"challenges\":[";
+
+        const auto &vec = survivalCriteriaManager.survivalCriteriasVector;
+        for (size_t i = 0; i < vec.size(); ++i) {
+            if (i > 0) ss << ",";
+            // Escape quotes in text/description
+            auto escape = [](const std::string &s) {
+                std::string out;
+                for (char c : s) {
+                    if (c == '"') out += "\\\"";
+                    else if (c == '\\') out += "\\\\";
+                    else if (c == '\n') out += "\\n";
+                    else out += c;
+                }
+                return out;
+            };
+            ss << "{\"value\":" << vec[i]->value
+               << ",\"text\":\"" << escape(vec[i]->text)
+               << "\",\"description\":\"" << escape(vec[i]->description)
+               << "\"}";
+        }
+        ss << "]}";
+        return ss.str();
     }
 }

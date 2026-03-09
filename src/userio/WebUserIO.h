@@ -75,6 +75,9 @@ namespace BS
 
         // Builds binary frame with positions, colors, barriers, shapes
         std::vector<char> buildFrame(unsigned simStep, unsigned generation);
+
+        // Builds JSON metadata sent to clients on connect
+        std::string buildMetadata();
     };
 }
 

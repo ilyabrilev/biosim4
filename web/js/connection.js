@@ -7,6 +7,7 @@ export class Connection {
         this.ws = null;
         this.connected = false;
         this.onMessage = null;
+        this.onMeta = null;
         this.onStatusChange = null;
     }
 
@@ -29,7 +30,14 @@ export class Connection {
         this.ws.onerror = () => this.ws.close();
 
         this.ws.onmessage = (e) => {
-            this.onMessage?.(e.data);
+            if (typeof e.data === 'string') {
+                try {
+                    const meta = JSON.parse(e.data);
+                    this.onMeta?.(meta);
+                } catch (err) { /* ignore malformed text */ }
+            } else {
+                this.onMessage?.(e.data);
+            }
         };
     }
 

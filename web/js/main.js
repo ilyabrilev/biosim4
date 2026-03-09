@@ -14,6 +14,7 @@ const controls = new Controls(connection);
 let state = null;
 
 connection.onStatusChange = (connected) => controls.setStatus(connected);
+connection.onMeta = (meta) => controls.applyMeta(meta);
 
 connection.onMessage = (data) => {
     state = parseFrame(data);

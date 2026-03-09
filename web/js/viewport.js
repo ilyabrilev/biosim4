@@ -29,15 +29,19 @@ export class Viewport {
         this.canvas.addEventListener('wheel', (e) => {
             e.preventDefault();
             const zoomFactor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+            const newScale = Math.max(0.5, Math.min(this.scale * zoomFactor, 50));
+            if (newScale === this.scale) return;
+
             const rect = this.canvas.getBoundingClientRect();
             const mx = e.clientX - rect.left - this.canvas.width / 2 - this.offsetX;
             const my = e.clientY - rect.top - this.canvas.height / 2 - this.offsetY;
+            const actualFactor = newScale / this.scale;
 
-            this.offsetX -= mx * (zoomFactor - 1);
-            this.offsetY -= my * (zoomFactor - 1);
-            this.scale = Math.max(0.5, Math.min(this.scale * zoomFactor, 50));
+            this.offsetX -= mx * (actualFactor - 1);
+            this.offsetY -= my * (actualFactor - 1);
+            this.scale = newScale;
             this.onChanged?.();
-        });
+        }, { passive: false });
 
         this.canvas.addEventListener('mousedown', (e) => {
             this._dragging = true;

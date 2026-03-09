@@ -19,13 +19,58 @@
     </div>
 
     <div class="controls">
-        <button id="btnPause">Pause</button>
-        <button id="btnResume">Resume</button>
+        <button id="btnPauseResume">Pause</button>
+        <button id="btnRestart">Restart</button>
 
         <div class="speed-control">
             <label>Speed:</label>
-            <input type="range" id="speedSlider" min="-5" max="5" value="0" step="1">
+            <input type="range" id="speedSlider" min="0" max="5" value="0" step="1">
             <span id="speedVal">0</span>
+        </div>
+
+        <div class="setting-control">
+            <label>Challenge:</label>
+            <div class="setting-input">
+                <select id="challengeSelect"></select>
+            </div>
+        </div>
+
+        <div class="setting-control">
+            <label>Barrier:</label>
+            <div class="setting-input">
+                <select id="barrierSelect"></select>
+            </div>
+        </div>
+
+        <div class="setting-control">
+            <label>Mutation Rate:</label>
+            <div class="setting-input">
+                <input type="text" id="mutationRate" value="0.001" size="8">
+                <button id="btnMutationOk">Ok</button>
+            </div>
+        </div>
+
+        <div class="setting-control">
+            <label>Steps/Generation:</label>
+            <div class="setting-input">
+                <input type="text" id="stepsPerGen" value="300" size="8">
+                <button id="btnStepsOk">Ok</button>
+            </div>
+        </div>
+
+        <div class="setting-control">
+            <label>Population:</label>
+            <div class="setting-input">
+                <input type="text" id="population" value="3000" size="8">
+                <button id="btnPopulationOk">Ok</button>
+            </div>
+        </div>
+
+        <div class="setting-control checkbox-control">
+            <label>
+                <input type="checkbox" id="killEnable">
+                Kill enabled
+            </label>
         </div>
     </div>
 
