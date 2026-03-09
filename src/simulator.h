@@ -3,8 +3,6 @@
 
 // Main header for the simulator. Also see simulator.cpp.
 
-#include <SFML/Graphics.hpp>
-#include <SFML/System.hpp>
 #include <omp.h>
 
 #include "basicTypes.h"   // types Dir, Coord, Polar and their values
