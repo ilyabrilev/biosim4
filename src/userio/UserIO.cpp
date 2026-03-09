@@ -1,22 +1,31 @@
 #include "UserIO.h"
+#include "SFMLUserIO.h"
+#include "imageWriter.h"
+#include "WebUserIO.h"
 
 namespace BS {
 
-    UserIO::UserIO(bool windowInit, bool videoSaveInit)
+    UserIO::UserIO(ViewMode viewMode, bool videoSaveInit)
     {
-        if (windowInit) 
+        switch (viewMode) {
+        case ViewMode::SFML:
             this->sfmlView = new SFMLUserIO();
-        if (videoSaveInit) 
-            this->imageWriter = new ImageWriter();     
-        
+            break;
+        case ViewMode::WEB:
+            this->webView = new WebUserIO();
+            break;
+        case ViewMode::NONE:
+            break;
+        }
+        if (videoSaveInit)
+            this->imageWriter = new ImageWriter();
     }
 
     UserIO::~UserIO()
     {
-        if (this->sfmlView != nullptr)
-            delete this->sfmlView;
-        if (this->imageWriter != nullptr)
-            delete this->imageWriter;
+        delete this->sfmlView;
+        delete this->imageWriter;
+        delete this->webView;
     }
 
     /**
@@ -26,6 +35,8 @@ namespace BS {
     {
         if (this->sfmlView != nullptr)
             return this->sfmlView->isStopped();
+        if (this->webView != nullptr)
+            return this->webView->isStopped();
         return false;
     }
 
@@ -34,15 +45,17 @@ namespace BS {
      */
     void UserIO::startNewGeneration(unsigned generation, unsigned stepsPerGeneration)
     {
-        if (this->sfmlView != nullptr) {
+        if (this->sfmlView != nullptr)
             this->sfmlView->startNewGeneration(generation, stepsPerGeneration);
-        }
-        if (p.autoSave) 
+        if (this->webView != nullptr)
+            this->webView->startNewGeneration(generation, stepsPerGeneration);
+
+        if (p.autoSave)
         {
             std::stringstream filename;
             filename << "Output/Saves/peeps-"
                         << std::setfill('0') << std::setw(6) << generation
-                        << ".bin";            
+                        << ".bin";
             Save::save(filename.str());
         }
     }
@@ -61,6 +74,15 @@ namespace BS {
             this->sfmlView->endOfStep(simStep);
         }
 
+        if (this->webView != nullptr)
+        {
+            while (this->isPaused() && !this->isStopped()) {
+                this->webView->endOfStep(simStep);
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            }
+            this->webView->endOfStep(simStep);
+        }
+
         if (this->imageWriter != nullptr)
             this->imageWriter->endOfStep(simStep, generation);
     }
@@ -72,10 +94,11 @@ namespace BS {
     {
         if (this->sfmlView != nullptr)
             this->sfmlView->endOfGeneration(generation);
-
+        if (this->webView != nullptr)
+            this->webView->endOfGeneration(generation);
         if (this->imageWriter != nullptr)
             this->imageWriter->endOfGeneration(generation);
-        
+
         if (p.updateGraphLog && (generation == 1 || ((generation % p.updateGraphLogStride) == 0))) {
             std::system(p.graphLogUpdateCommand.c_str());
         }
@@ -85,7 +108,9 @@ namespace BS {
     {
         if (this->sfmlView != nullptr)
             this->sfmlView->log(message);
-        
+        if (this->webView != nullptr)
+            this->webView->log(message);
+
         std::cout << message << std::endl;
     }
 
@@ -96,7 +121,8 @@ namespace BS {
     {
         if (this->sfmlView != nullptr)
             return this->sfmlView->isPaused() && !this->sfmlView->loadFileSelected;
-
+        if (this->webView != nullptr)
+            return this->webView->isPaused() && !this->webView->loadFileSelected;
         return false;
     }
 
@@ -106,9 +132,9 @@ namespace BS {
     bool UserIO::getLoadFileSelected()
     {
         if (this->sfmlView != nullptr)
-        {
             return this->sfmlView->loadFileSelected;
-        }
+        if (this->webView != nullptr)
+            return this->webView->loadFileSelected;
         return false;
     }
 
@@ -118,9 +144,9 @@ namespace BS {
     std::string UserIO::getLoadFilename()
     {
         if (this->sfmlView != nullptr)
-        {
             return this->sfmlView->loadFilename;
-        }
+        if (this->webView != nullptr)
+            return this->webView->loadFilename;
         return "";
     }
 
@@ -129,10 +155,13 @@ namespace BS {
      */
     void UserIO::cleanLoadSelection()
     {
-        if (this->sfmlView != nullptr)
-        {
+        if (this->sfmlView != nullptr) {
             this->sfmlView->loadFilename = "";
             this->sfmlView->loadFileSelected = false;
+        }
+        if (this->webView != nullptr) {
+            this->webView->loadFilename = "";
+            this->webView->loadFileSelected = false;
         }
     }
 
@@ -142,9 +171,9 @@ namespace BS {
     void UserIO::setFromParams()
     {
         if (this->sfmlView != nullptr)
-        {        
             this->sfmlView->setFromParams();
-        }
+        if (this->webView != nullptr)
+            this->webView->setFromParams();
     }
 
     /**
@@ -153,9 +182,9 @@ namespace BS {
     bool UserIO::getRestartAtEnd()
     {
         if (this->sfmlView != nullptr)
-        {        
             return this->sfmlView->restartOnEnd;
-        }
+        if (this->webView != nullptr)
+            return this->webView->restartOnEnd;
         return false;
     }
 }

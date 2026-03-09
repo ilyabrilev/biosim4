@@ -200,15 +200,25 @@ void simulator(int argc, char **argv)
     // Simulator parameters are available read-only through the global
     // variable p after paramManager is initialized.
     // Todo: remove the hardcoded parameter filename.
+    // Parse command line: flags (--web) and config file name
+    ViewMode viewMode = ViewMode::SFML;
+    std::string configFile = "biosim4.ini";
+    for (int i = 1; i < argc; ++i) {
+        std::string arg(argv[i]);
+        if (arg == "--web") {
+            viewMode = ViewMode::WEB;
+        } else if (arg[0] != '-') {
+            configFile = arg;
+        }
+    }
+
     paramManager.setDefaults();
-    paramManager.registerConfigFile(argc > 1 ? argv[1] : "biosim4.ini");
+    paramManager.registerConfigFile(configFile.c_str());
     paramManager.updateFromConfigFile(0);
     paramManager.checkParameters(); // check and report any problems
 
     randomUint.initialize(); // seed the RNG for main-thread use
-
-    // UI must be initialized after parameters
-    userIO = new UserIO(true, false);
+    userIO = new UserIO(viewMode, false);
     
     runMode = RunMode::RUN;
     unsigned generation = 0;

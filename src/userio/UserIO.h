@@ -1,25 +1,30 @@
 #ifndef USERIO_H_INCLUDED
 #define USERIO_H_INCLUDED
 
-// Operate with view of simulation throught console, images, or window
+// Operate with view of simulation through console, images, window, or browser
 
-#include "imageWriter.h"
-#include "SFMLUserIO.h"
 #include "../peeps.h"
 #include "../utils/Save.h"
 
 namespace BS
 {
     extern const Params &p;
-    
+
+    // Forward declarations to avoid pulling SFML/uWS headers into every TU
+    class SFMLUserIO;
+    class ImageWriter;
+    class WebUserIO;
+
+    enum class ViewMode { SFML, WEB, NONE };
+
     /**
-     * UserIO class handles all simulation events that must be displayed 
-     * and passed to imageWriter or SFMLUserIO classes
+     * UserIO class handles all simulation events that must be displayed
+     * and passed to imageWriter, SFMLUserIO, or WebUserIO classes
      */
     class UserIO
     {
     public:
-        UserIO(bool windowInit, bool videoSaveInit);
+        UserIO(ViewMode viewMode, bool videoSaveInit);
         ~UserIO();
 
         bool isStopped();
@@ -41,6 +46,7 @@ namespace BS
     private:
         ImageWriter* imageWriter = nullptr;
         SFMLUserIO* sfmlView = nullptr;
+        WebUserIO* webView = nullptr;
     };
 }
 
