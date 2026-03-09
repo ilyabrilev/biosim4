@@ -18,8 +18,8 @@ namespace BS
     void ChallengeRightQuarter::initShapes(int liveDisplayScale)
     {
         this->createLine(
-            sf::Vector2f((p.sizeX / 2 + p.sizeX / 4) * liveDisplayScale, 0), 
-            sf::Vector2f((p.sizeX / 2 + p.sizeX / 4) * liveDisplayScale, p.sizeY * liveDisplayScale)
+            (p.sizeX / 2 + p.sizeX / 4) * liveDisplayScale, 0,
+            (p.sizeX / 2 + p.sizeX / 4) * liveDisplayScale, p.sizeY * liveDisplayScale
         );
     }
 }

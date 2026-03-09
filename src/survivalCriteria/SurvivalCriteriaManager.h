@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <SFML/Graphics.hpp>
 
 #include "../ai/signals.h"
 
@@ -50,7 +49,7 @@ namespace BS
             std::pair<bool, float> passedSurvivalCriterion(const Indiv &indiv, const Params &p, Grid &grid);
             std::pair<bool, float> passedSurvivalCriterion(const Indiv &indiv, const Params &p, Grid &grid, unsigned challenge);
 
-            std::vector<sf::Drawable*> getShapes();
+            const std::vector<CriteriaShape>& getShapes();
             void endOfStep(unsigned simStep, const Params &p, Grid &grid, Peeps &peeps, Signals signals);
 
         private:

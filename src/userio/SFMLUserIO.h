@@ -101,6 +101,10 @@ namespace BS
         uint16_t selectedIndex = 0; // selected individual index
 
         bool passedSelected = false;
+
+        std::vector<sf::CircleShape> indivShapes; // index matches peeps index
+        void initIndivShapes();
+        static sf::Color makeIndivColor(const Indiv &indiv);
     };
 }
 

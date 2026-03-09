@@ -37,7 +37,7 @@ namespace BS
     {
         if (this->currentChallenge != nullptr)
         {
-            this->currentChallenge->deleteShapes();
+            this->currentChallenge->clearShapes();
         }
         this->currentChallenge = this->getById(challengeId);
     }
@@ -79,7 +79,7 @@ namespace BS
         return this->survivalCriteriasVector[0];
     }
 
-    std::vector<sf::Drawable*> SurvivalCriteriaManager::getShapes()
+    const std::vector<CriteriaShape>& SurvivalCriteriaManager::getShapes()
     {
         return this->currentChallenge->shapes;
     }

@@ -3,8 +3,6 @@
 
 // Indiv is the structure that represents one individual agent.
 
-#include <SFML/Graphics.hpp>
-
 #include <algorithm>
 #include <cstdint>
 #include <array>
@@ -38,9 +36,7 @@ struct Indiv {
     std::stringstream printIGraphEdgeList() const;
     void printGenome() const;
 
-	sf::CircleShape shape;
-    uint8_t makeGeneticColor();
-    void fillColor();
+    uint8_t makeGeneticColor() const;
     void initVariables();
 
     template <class Archive>

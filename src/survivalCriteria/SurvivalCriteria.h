@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <SFML/Graphics.hpp>
+#include <variant>
 
 #include "../ai/indiv.h"
 #include "../grid.h"
@@ -36,6 +36,30 @@ namespace BS
     constexpr unsigned CHALLENGE_ALTRUISM_SACRIFICE = 18;
     constexpr unsigned CHALLENGE_CORNER_RANDOM = 19;
 
+    // Platform-agnostic shape descriptors for challenge visualization
+    struct ShapeColor {
+        uint8_t r, g, b, a;
+    };
+
+    struct ShapeCircle {
+        float radius;
+        float x, y;
+        ShapeColor outlineColor;
+        bool filled;  // false = outline only
+    };
+
+    struct ShapeRect {
+        float x, y, width, height;
+        ShapeColor fillColor;
+    };
+
+    struct ShapeLine {
+        float x1, y1, x2, y2;
+        ShapeColor color;
+    };
+
+    using CriteriaShape = std::variant<ShapeCircle, ShapeRect, ShapeLine>;
+
     /**
      * Base class for survival criteria
      */
@@ -46,20 +70,20 @@ namespace BS
             std::string text;
             std::string description;
 
-            std::vector<sf::Drawable*> shapes;
+            std::vector<CriteriaShape> shapes;
 
             virtual std::pair<bool, float> passed(const Indiv &indiv, const Params &p, Grid &grid) = 0;
             virtual void initShapes(int liveDisplayScale);
             virtual void endOfStep(unsigned simStep, const Params &p, Grid &grid, Peeps &peeps);
-            void deleteShapes();
+            void clearShapes();
             SurvivalCriteria(unsigned value, std::string text, std::string description) : value(value), text(text), description(description) {}
             SurvivalCriteria() {}
         protected:
             void createBorder(float size, int liveDisplayScale);
             void createCircle(float radius, float x, float y);
-            void createLine(sf::Vector2f vector, sf::Vector2f vectorTwo);
+            void createLine(float x1, float y1, float x2, float y2);
 
-            sf::Color defaultColor = sf::Color(255,255,255,127);
+            static constexpr ShapeColor defaultColor = {255, 255, 255, 127};
     };
 }
 

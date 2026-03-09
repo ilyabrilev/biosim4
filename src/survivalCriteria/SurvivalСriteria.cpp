@@ -17,71 +17,43 @@ namespace BS
      * Some criterias like ChallengeRadioactiveWalls has special logic
      * performed after each step. Most of criterias do nothing.
      */
-    void SurvivalCriteria::endOfStep(unsigned simStep, const Params &p, Grid &grid, Peeps &peeps) 
+    void SurvivalCriteria::endOfStep(unsigned simStep, const Params &p, Grid &grid, Peeps &peeps)
     {
     }
 
     /**
-     * Clears all Drawables of survival criteria
-     * 
+     * Clears all shape descriptors of survival criteria
      */
-    void SurvivalCriteria::deleteShapes()
+    void SurvivalCriteria::clearShapes()
     {
-        for (sf::Drawable *shape : this->shapes)
-        {
-            delete shape;
-        }
         this->shapes.clear();
     }
 
     void SurvivalCriteria::createCircle(float radius, float x, float y)
     {
-        sf::CircleShape* shape = new sf::CircleShape();
-        shape->setRadius(radius);
-        shape->setPosition(x, y);
-        shape->setOutlineThickness(1);
-        shape->setOutlineColor(this->defaultColor);
-        shape->setFillColor(sf::Color::Transparent);
-        this->shapes.push_back(shape);
+        shapes.push_back(ShapeCircle{radius, x, y, defaultColor, false});
     }
 
     void SurvivalCriteria::createBorder(float size, int liveDisplayScale)
     {
-        //create border around grid
-        sf::Color borderColor = sf::Color::Black;
-        sf::RectangleShape* topRect = new sf::RectangleShape();
-        topRect->setSize(sf::Vector2f(p.sizeX * liveDisplayScale + size*2, size));
-        topRect->setPosition(0 - size, 0 - size);
-        topRect->setFillColor(borderColor);
-        this->shapes.push_back(topRect);
+        constexpr ShapeColor borderColor = {0, 0, 0, 255};
 
-        sf::RectangleShape* bottomRect = new sf::RectangleShape();
-        bottomRect->setSize(sf::Vector2f(p.sizeX * liveDisplayScale + size*2, size));
-        bottomRect->setPosition(0 - size, p.sizeY * liveDisplayScale);
-        bottomRect->setFillColor(borderColor);
-        this->shapes.push_back(bottomRect);
-
-        sf::RectangleShape* leftRect = new sf::RectangleShape();
-        leftRect->setSize(sf::Vector2f(size, p.sizeY * liveDisplayScale + size*2));
-        leftRect->setPosition(0 - size, 0 - size);
-        leftRect->setFillColor(borderColor);
-        this->shapes.push_back(leftRect);
-
-        sf::RectangleShape* rightRect = new sf::RectangleShape();
-        rightRect->setSize(sf::Vector2f(size, p.sizeY * liveDisplayScale + size*2));
-        rightRect->setPosition(p.sizeX * liveDisplayScale, 0 - size);
-        rightRect->setFillColor(borderColor);
-        this->shapes.push_back(rightRect);
+        // top
+        shapes.push_back(ShapeRect{0 - size, 0 - size,
+            p.sizeX * (float)liveDisplayScale + size * 2, size, borderColor});
+        // bottom
+        shapes.push_back(ShapeRect{0 - size, p.sizeY * (float)liveDisplayScale,
+            p.sizeX * (float)liveDisplayScale + size * 2, size, borderColor});
+        // left
+        shapes.push_back(ShapeRect{0 - size, 0 - size,
+            size, p.sizeY * (float)liveDisplayScale + size * 2, borderColor});
+        // right
+        shapes.push_back(ShapeRect{p.sizeX * (float)liveDisplayScale, 0 - size,
+            size, p.sizeY * (float)liveDisplayScale + size * 2, borderColor});
     }
 
-    void SurvivalCriteria::createLine(sf::Vector2f vectorOne, sf::Vector2f vectorTwo)
+    void SurvivalCriteria::createLine(float x1, float y1, float x2, float y2)
     {
-        sf::VertexArray* lineLeft = new sf::VertexArray(sf::LinesStrip, 2);
-        lineLeft->clear();
-        sf::Vertex vertexOne = sf::Vertex(vectorOne, this->defaultColor);
-        lineLeft->append(vertexOne);
-        sf::Vertex vertexTwo = sf::Vertex(vectorTwo, this->defaultColor);
-        lineLeft->append(vertexTwo);
-        this->shapes.push_back(lineLeft);
+        shapes.push_back(ShapeLine{x1, y1, x2, y2, defaultColor});
     }
 }

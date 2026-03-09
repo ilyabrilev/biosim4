@@ -18,8 +18,8 @@ namespace BS
     void ChallengeLeftEight::initShapes(int liveDisplayScale)
     {
         this->createLine(
-            sf::Vector2f(p.sizeX / 8 * liveDisplayScale, 0), 
-            sf::Vector2f(p.sizeX / 8 * liveDisplayScale, p.sizeY * liveDisplayScale)
+            p.sizeX / 8 * liveDisplayScale, 0,
+            p.sizeX / 8 * liveDisplayScale, p.sizeY * liveDisplayScale
         );
     }
 }

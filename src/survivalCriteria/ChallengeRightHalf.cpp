@@ -18,8 +18,8 @@ namespace BS
     void ChallengeRightHalf::initShapes(int liveDisplayScale)
     {
         this->createLine(
-            sf::Vector2f(p.sizeX / 2 * liveDisplayScale, 0), 
-            sf::Vector2f(p.sizeX / 2 * liveDisplayScale, p.sizeY * liveDisplayScale)
+            p.sizeX / 2 * liveDisplayScale, 0,
+            p.sizeX / 2 * liveDisplayScale, p.sizeY * liveDisplayScale
         );
     }
 }

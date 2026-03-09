@@ -138,21 +138,20 @@ namespace BS
             {
                 if (select) {
                     this->passedSelected = true;
-                    peeps[this->selectedIndex].shape.setOutlineThickness(0.f);
+                    this->indivShapes[this->selectedIndex].setOutlineThickness(0.f);
                     this->selectedIndex = 0;
 
                     for (uint16_t index = 1; index <= p.population; ++index) {
                         std::pair<bool, float> passed = survivalCriteriaManager.passedSurvivalCriterion(peeps[index], p, grid);
-                        if (passed.first) {  
-                            Indiv peep = peeps[index];                      
-                            peeps[index].shape.setOutlineColor(sf::Color::White);
-                            peeps[index].shape.setOutlineThickness(1.f);
+                        if (passed.first) {
+                            this->indivShapes[index].setOutlineColor(sf::Color::White);
+                            this->indivShapes[index].setOutlineThickness(1.f);
                         }
                     }
                 } else {
                     this->passedSelected = false;
                     for (uint16_t index = 1; index <= p.population; ++index) {
-                        peeps[index].shape.setOutlineThickness(0.f);
+                        this->indivShapes[index].setOutlineThickness(0.f);
                     }
                 }
             }
@@ -309,16 +308,16 @@ namespace BS
                     {
                         uint16_t index = grid.at(x, y);
                         if (this->selectedIndex != 0 && this->selectedIndex != index) {
-                            peeps[this->selectedIndex].shape.setOutlineThickness(0.f);
+                            this->indivShapes[this->selectedIndex].setOutlineThickness(0.f);
                             this->selectedIndex = 0;
                         }
                         if (index != 0) {
-                            peeps[index].shape.setOutlineColor(sf::Color::White);
-                            peeps[index].shape.setOutlineThickness(1.f);
+                            this->indivShapes[index].setOutlineColor(sf::Color::White);
+                            this->indivShapes[index].setOutlineThickness(1.f);
                             this->selectedIndex = index;
                         }
                     } else if (this->selectedIndex != 0) {
-                        peeps[this->selectedIndex].shape.setOutlineThickness(0.f);
+                        this->indivShapes[this->selectedIndex].setOutlineThickness(0.f);
                         this->selectedIndex = 0;
                     }
                 }
@@ -357,9 +356,11 @@ namespace BS
 
         survivalCriteriaManager.initShapes(liveDisplayScale);
 
+        this->initIndivShapes();
+
         // clear manual selection
         if (this->selectedIndex != 0) {
-            peeps[this->selectedIndex].shape.setOutlineThickness(0.f);
+            this->indivShapes[this->selectedIndex].setOutlineThickness(0.f);
             this->selectedIndex = 0;
         }
         
@@ -403,10 +404,10 @@ namespace BS
                 Indiv &indiv = peeps[index];
                 if (indiv.alive)
                 {
-                    indiv.shape.setPosition(
+                    this->indivShapes[index].setPosition(
                         static_cast<float>(indiv.loc.x * liveDisplayScale),
                         static_cast<float>(((p.sizeY - indiv.loc.y) - 1) * liveDisplayScale));
-                    this->window->draw(indiv.shape);
+                    this->window->draw(this->indivShapes[index]);
                 }
             }
 
@@ -416,8 +417,28 @@ namespace BS
             }
             
             // display survival criterias
-            for (sf::Drawable *shape : survivalCriteriaManager.getShapes()) {
-                this->window->draw(*shape);
+            for (const auto &shape : survivalCriteriaManager.getShapes()) {
+                std::visit([this](const auto &s) {
+                    using T = std::decay_t<decltype(s)>;
+                    if constexpr (std::is_same_v<T, ShapeCircle>) {
+                        sf::CircleShape circle(s.radius);
+                        circle.setPosition(s.x, s.y);
+                        circle.setOutlineThickness(1);
+                        circle.setOutlineColor(sf::Color(s.outlineColor.r, s.outlineColor.g, s.outlineColor.b, s.outlineColor.a));
+                        circle.setFillColor(sf::Color::Transparent);
+                        this->window->draw(circle);
+                    } else if constexpr (std::is_same_v<T, ShapeRect>) {
+                        sf::RectangleShape rect(sf::Vector2f(s.width, s.height));
+                        rect.setPosition(s.x, s.y);
+                        rect.setFillColor(sf::Color(s.fillColor.r, s.fillColor.g, s.fillColor.b, s.fillColor.a));
+                        this->window->draw(rect);
+                    } else if constexpr (std::is_same_v<T, ShapeLine>) {
+                        sf::VertexArray line(sf::LinesStrip, 2);
+                        line.append(sf::Vertex(sf::Vector2f(s.x1, s.y1), sf::Color(s.color.r, s.color.g, s.color.b, s.color.a)));
+                        line.append(sf::Vertex(sf::Vector2f(s.x2, s.y2), sf::Color(s.color.r, s.color.g, s.color.b, s.color.a)));
+                        this->window->draw(line);
+                    }
+                }, shape);
             }
 
             this->gui.draw();
@@ -494,5 +515,36 @@ namespace BS
     void SFMLUserIO::speedChanged(float value)
     {
         this->speedThreshold = value;
+    }
+
+    sf::Color SFMLUserIO::makeIndivColor(const Indiv &indiv)
+    {
+        uint8_t rawColor = indiv.makeGeneticColor();
+        uint8_t color[3];
+
+        constexpr uint8_t minColorVal = 100;
+        constexpr uint8_t minLumaVal = 50;
+        auto rgbToLuma = [](uint8_t r, uint8_t g, uint8_t b) { return (r+r+r+b+g+g+g+g) / 8; };
+
+        color[0] = (rawColor);
+        color[1] = ((rawColor & 0x1f) << 3);
+        color[2] = ((rawColor & 7)    << 5);
+
+        if (rgbToLuma(color[0], color[1], color[2]) < minLumaVal) {
+            if (color[0] < minColorVal) color[0] = 255 - color[0];
+            if (color[1] < minColorVal) color[1] = 255 - color[1];
+            if (color[2] < minColorVal) color[2] = 255 - color[2];
+        }
+
+        return sf::Color(color[0], color[1], color[2], 255);
+    }
+
+    void SFMLUserIO::initIndivShapes()
+    {
+        indivShapes.resize(p.population + 1);
+        for (uint16_t index = 1; index <= p.population; ++index) {
+            indivShapes[index].setRadius(2);
+            indivShapes[index].setFillColor(makeIndivColor(peeps[index]));
+        }
     }
 }
